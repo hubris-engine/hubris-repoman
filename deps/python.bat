@@ -15,7 +15,7 @@ set PYTHON_SCRIPT_PATH=%SCRIPT_DIR%/scripts/python.py
 
 :: Use a reasonable default if no PYTHON env variable is defined
 IF "%PYTHON%"=="" ( 
-    set PYTHON_TOOL=python3
+    set PYTHON_TOOL=python
 ) ELSE (
 	set PYTHON_TOOL=%PYTHON%
 )

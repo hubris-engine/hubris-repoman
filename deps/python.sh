@@ -12,7 +12,7 @@ TOOLS_ROOT=${REPO_ROOT}/tools
 
 # Use a reasonable default if no PYTHON env variable is defined
 if [[ -z "$PYTHON" ]]; then
-	PYTHON_TOOL=python3
+	PYTHON_TOOL=python
 fi
 
 # Fix path seperators

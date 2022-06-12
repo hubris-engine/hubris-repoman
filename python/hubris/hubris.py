@@ -9,6 +9,9 @@ def _get_logger():
 		_logger = Logger()
 	return _logger
 
+def write_log(level : LogLevel, msg : str):
+	_get_logger().log(level, msg)
+
 def log_warn(msg):
 	_get_logger().log_warn(msg)
 

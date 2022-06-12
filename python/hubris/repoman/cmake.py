@@ -119,7 +119,12 @@ class CMake:
 
 		hubris.log_debug(f"{cmake_generate_command}")
 
-		result = subprocess.run(cmake_generate_command, env=_env)
+		try:
+			result = subprocess.run(cmake_generate_command, env=_env)
+		except FileNotFoundError as exc:
+			hubris.log_error("Missing cmake, please install it and ensure it is available on the path")
+			exit(1)
+
 		if result.returncode == 0:
 			return True
 		else:
@@ -232,11 +237,27 @@ class CMake:
 				config
 			])
 
-		result = subprocess.run(cmake_install_command)
-		if result.returncode == 0:
-			return True
-		else:
-			return False
+		# Ensure the build root exists
+		if not build_root.exists():
+			os.makedirs(build_root)
+		log_file_path = build_root.joinpath("install_log.txt")
+
+
+		with open(log_file_path, "w") as logfile:
+			result = subprocess.run(cmake_install_command, stdout=logfile)
+
+			# Snag the log output
+			log_output = ""
+			with open(log_file_path, "r") as f:
+				log_output = f.read()
+			
+			# Report result, log as needed
+			if result.returncode == 0:
+				hubris.log_debug(log_output)
+				return True
+			else:
+				hubris.log_error(log_output)
+				return False
 
 	def generate_and_build(self,
 		defs : "list[CMakeDef]" = [],

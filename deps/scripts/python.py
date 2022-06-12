@@ -105,7 +105,7 @@ if len(add_python_paths) != 0:
 
 
 # Form the command
-proc_command = ["python3"]
+proc_command = ["python"]
 if len(args) == 0:
 	print("[Error] No arguments were given!")
 	exit(1)

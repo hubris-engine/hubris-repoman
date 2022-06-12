@@ -9,23 +9,33 @@ class Level:
 
 	all     = debug
 
+# Logging level names
+_LEVEL_NAMES = [
+	"[?]",
+	"[Error]",
+	"[Warn]",
+	"[Info]",
+	"[Debug]"
+]
+
+
 class Logger:
 
+	def log(self, level : Level, msg : str):
+		if self.level >= level:
+			print(f"{_LEVEL_NAMES[level]} {msg}")
+
 	def log_warn(self, msg):
-		if self.level >= Level.warn:
-			print(f"[Warning] {msg}")
+		self.log(Level.warn, msg)
 	
 	def log_error(self, msg):
-		if self.level >= Level.error:
-			print(f"[Error] {msg}")
+		self.log(Level.error, msg)
 	
 	def log_info(self, msg):
-		if self.level >= Level.info:
-			print(f"[Info] {msg}")
+		self.log(Level.info, msg)
 	
 	def log_debug(self, msg):
-		if self.level >= Level.debug:
-			print(f"[Debug] {msg}")
+		self.log(Level.debug, msg)
 
 	def __init__(self, level=Level.all):
 		self.level = level
