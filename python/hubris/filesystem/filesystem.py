@@ -65,8 +65,6 @@ class _DirectoryIteratorRecursive:
 					_keepLooking = False
 					break
 
-			print(str(_curVal))
-
 			if self._followSymlinks and _curVal.is_symlink():
 				# Follow symlink if enabled
 				_symTarget = _curVal.resolve(strict = True)

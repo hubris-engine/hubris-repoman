@@ -4,6 +4,9 @@ import hubris
 from argparse import ArgumentParser
 from pathlib import Path
 
+
+_BASH_SHEBANG = "#!/usr/bin/env bash"
+
 parser = ArgumentParser(description="Generates a batch or shell script that redirects to a python script")
 parser.add_argument("py_script", type=Path, help="Path to the python script to redirect into")
 parser.add_argument("name", type=Path, help="Name/path for the generated scripts to use, extension will be replaced or added as needed")
@@ -92,7 +95,7 @@ def pyredirect(py_script_path : Path, name : Path, shell : bool, batch : bool, r
 		out_path = name.with_suffix(".sh")
 
 		lines = [
-			"#!",
+			_BASH_SHEBANG,
 			"set -e",
 			"",
 			"# Path to this script's parent directory",
