@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+DEFAULT_PYTHON_TOOL="python3"
+
 # Path to this script's parent directory
 SCRIPT_DIR=$(dirname ${BASH_SOURCE})
 
@@ -12,11 +14,11 @@ TOOLS_ROOT=${REPO_ROOT}/tools
 
 # Use a reasonable default if no PYTHON env variable is defined
 if [[ -z "$PYTHON" ]]; then
-	PYTHON_TOOL=python
+	PYTHON_TOOL="${DEFAULT_PYTHON_TOOL}"
+else
+	# Fix path seperators
+	PYTHON_TOOL=${PYTHON//\\//}
 fi
-
-# Fix path seperators
-PYTHON_TOOL=${PYTHON//\\//}
 
 # Path to the python script
 PYTHON_SCRIPT=${SCRIPT_DIR}/scripts/python.py

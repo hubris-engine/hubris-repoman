@@ -1,6 +1,8 @@
 @ECHO OFF
 SETLOCAL
 
+set DEFAULT_PYTHON_TOOL="python3"
+
 :: Path to this script's directory
 set SCRIPT_DIR=%~dp0
 
@@ -15,7 +17,7 @@ set PYTHON_SCRIPT_PATH=%SCRIPT_DIR%/scripts/python.py
 
 :: Use a reasonable default if no PYTHON env variable is defined
 IF "%PYTHON%"=="" ( 
-    set PYTHON_TOOL=python
+    set PYTHON_TOOL=%DEFAULT_PYTHON_TOOL%
 ) ELSE (
 	set PYTHON_TOOL=%PYTHON%
 )

@@ -10,6 +10,8 @@ _ADD_PYTHON_PATHS = [
 	"tools/python"
 ]
 
+# Python executable to use
+_PYTHON_TOOL="python3"
 
 # Resolve the path to this script
 exec_script_path = Path(sys.argv[0])
@@ -105,7 +107,7 @@ if len(add_python_paths) != 0:
 
 
 # Form the command
-proc_command = ["python"]
+proc_command = [_PYTHON_TOOL]
 if len(args) == 0:
 	print("[Error] No arguments were given!")
 	exit(1)
