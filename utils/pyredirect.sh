@@ -1,4 +1,4 @@
-#!
+#!/usr/bin/env bash
 set -e
 
 # Path to this script's parent directory
