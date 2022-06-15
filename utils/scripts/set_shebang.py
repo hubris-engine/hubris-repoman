@@ -46,7 +46,7 @@ def replace_shebang(file_path : Path, shebang : str):
     file_str = f"#{shebang}\n" + file_str
 
     # Write to disk
-    with open(file_path, "w") as file:
+    with open(file_path, "w", newline="\n") as file:
         file.write(file_str)
 
 
