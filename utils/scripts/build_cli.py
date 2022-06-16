@@ -15,6 +15,9 @@ group.add_argument("-c", "--clean", help="Cleans the repo", action="store_true",
 group.add_argument("-x", "--rebuild", help="Cleans and then builds the repo", action="store_true", default=False)
 group.add_argument("-b", "--build", help="Builds the repo", action="store_true", default=False)
 
+group.add_argument("--config", choices=["debug", "release", "all"], default=None,
+	help='The config(s) to build')
+
 args = parser.parse_args()
 
 
@@ -25,6 +28,7 @@ if args.getdeps:
 	def getdeps_step():
 		return getdeps(force = True)
 	steps.insert(0, getdeps_step)
+
 
 if args.clean:
 	steps.extend([clean])

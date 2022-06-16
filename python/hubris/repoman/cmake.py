@@ -70,7 +70,10 @@ def _make_cmake_generate_command(
 	])
 
 	for v in definitions:
-		command.append(v.make_def())
+		if type(v) == type(""):
+			command.append(v)
+		else:
+			command.append(v.make_def())
 	command.extend(["-S", source_root])
 	command.extend(["-B", build_root])
 	
@@ -80,7 +83,7 @@ def _make_cmake_generate_command(
 class CMake:
 
 	def generate(self,
-		defs : "list[CMakeDef]" = [],
+		defs : "list[CMakeDef]" = None,
 		build_root : "pathlib.Path" = "_build",
 		source_root : "pathlib.Path" = ".",
 		compiler : Compiler = Compiler.clang,
@@ -90,8 +93,14 @@ class CMake:
 		build_root : Path to the build directory root relative to the repository root dir. 
 		"""
 
+		if defs is None:
+			defs = []
+
 		build_root = pathlib.Path(build_root)
 		source_root = pathlib.Path(source_root)
+
+		# Create our custom environment
+		_env = env or os.environ
 
 		if not build_root.is_absolute():
 			build_root = self._repo_root.joinpath(build_root).resolve()
@@ -100,23 +109,24 @@ class CMake:
 			source_root = self._repo_root.joinpath(source_root).resolve()
 			hubris.log_debug(f"Resolved CMake source root to {str(build_root)}")
 
+		# If the compiler was specified, set it
+		cmake_generate_extra_args = []
+		if compiler is not None:
+			name = _COMPILER_NAMES[compiler]
+			_env["CC"] = name.c
+			_env["CXX"] = name.cpp
+			cmake_generate_extra_args.append(f"-DCMAKE_C_COMPILER={name.c}")
+			cmake_generate_extra_args.append(f"-DCMAKE_CXX_COMPILER={name.cpp}")
+			hubris.log_debug(f'CC = {_env["CC"]}')
+			hubris.log_debug(f'CXX = {_env["CXX"]}')
+
+		defs.extend(cmake_generate_extra_args)
 		cmake_generate_command = _make_cmake_generate_command(
 			defs,
 			log_level=CMakeLogLevel.verbose,
 			build_root=str(build_root),
 			source_root=str(source_root)
 		)
-
-		# Create our custom environment
-		_env = env or os.environ
-
-		# If the compiler was specified, set it
-		if compiler is not None:
-			_env["CC"] = _COMPILER_NAMES[compiler].c
-			_env["CXX"] = _COMPILER_NAMES[compiler].cpp
-			hubris.log_debug(f'CC = {_env["CC"]}')
-			hubris.log_debug(f'CXX = {_env["CXX"]}')
-
 		hubris.log_debug(f"{cmake_generate_command}")
 
 		try:
@@ -215,8 +225,9 @@ class CMake:
 			return False
 
 	def install(self,
-		build_root : pathlib.Path = "_build",
-		install_prefix : pathlib.Path = "_install",
+		build_root : "pathlib.Path | str" = "_build",
+		install_prefix : "pathlib.Path | str" = "_install",
+		component : "str | None" = None,
 		config : "str | None" = None):
 
 		build_root = pathlib.Path(build_root)
@@ -229,6 +240,13 @@ class CMake:
 			"--prefix",
 			str(install_prefix.resolve()),
 		]
+		hubris.log_debug(f"{cmake_install_command}")
+
+		# Set the component if one was specified.
+		if component is not None:
+			cmake_install_command.extend([
+				"--component", component
+			])
 
 		# Set the config if one was specified.
 		if config is not None:
@@ -241,7 +259,6 @@ class CMake:
 		if not build_root.exists():
 			os.makedirs(build_root)
 		log_file_path = build_root.joinpath("install_log.txt")
-
 
 		with open(log_file_path, "w") as logfile:
 			result = subprocess.run(cmake_install_command, stdout=logfile)

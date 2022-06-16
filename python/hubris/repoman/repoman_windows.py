@@ -48,6 +48,16 @@ class RepoMan_Windows:
 			return False
 		return True
 
+	def generate(self, **tool_args):
+		if not self.tool.generate(**tool_args):
+			return False
+		return True
+
+	def just_build(self, **tool_args):
+		if not self.tool.build(**tool_args):
+			return False
+
+		return True
 	def install(self, **tool_args):
 		if not self.tool.install(**tool_args):
 			return False
