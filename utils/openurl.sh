@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-DEFAULT_PYTHON_TOOL="python"
-
 # Path to this script's parent directory
 SCRIPT_DIR=$(dirname ${BASH_SOURCE})
 
@@ -12,19 +10,14 @@ REPO_ROOT=${SCRIPT_DIR}/../..
 # Path to the tools directory
 TOOLS_ROOT=${REPO_ROOT}/tools
 
-# Use a reasonable default if no PYTHON env variable is defined
-if [[ -z "$PYTHON" ]]; then
-	PYTHON_TOOL="${DEFAULT_PYTHON_TOOL}"
-else
-	# Fix path seperators
-	PYTHON_TOOL=${PYTHON//\\//}
-fi
+# Path to the python tool
+PYTHON_TOOL=${TOOLS_ROOT}/deps/python.sh
 
 # Path to the python script
-PYTHON_SCRIPT=${SCRIPT_DIR}/scripts/python.py
+PYTHON_SCRIPT=${SCRIPT_DIR}/scripts/openurl.py
 
 # Invoke the python script and forward in given args
-"${PYTHON_TOOL}" "${PYTHON_SCRIPT}" $@
+"${BASH}" "${PYTHON_TOOL}" "${PYTHON_SCRIPT}" $@
 
 # Forward exit code
 exit $?

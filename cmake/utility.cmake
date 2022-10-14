@@ -116,7 +116,43 @@ macro(SUBDIRLIST result curdir)
 	set(${result} ${dirlist})
 endmacro()
 
+macro(SUBDIRLIST_RECURSIVE out_Dirs in_Path)
+	set(__curDirs )
+	SUBDIRLIST(__curDirs ${in_Path})
+	list(TRANSFORM __curDirs PREPEND "${in_Path}/")
+	list(APPEND ${out_Dirs} ${__curDirs})
+	foreach(lfe IN LISTS __curDirs)
+		SUBDIRLIST_RECURSIVE(${out_Dirs} ${lfe})
+	endforeach()
+endmacro()
 
+#
+#	Returns the child paths of a given directory
+#
+macro(GET_DIRECTORY_CONTENTS result curdir)
+	file(GLOB children RELATIVE ${curdir} ${curdir}/*)
+	set(dirlist "")
+	foreach(child ${children})
+			list(APPEND dirlist ${child})
+	endforeach()
+	set(${result} ${dirlist})
+endmacro()
+
+#
+#	Returns the child paths of a given directory, recursively
+#
+macro(GET_DIRECTORY_CONTENTS_RECURSIVE out_Contents in_Path)
+	set(__curDirs )
+	GET_DIRECTORY_CONTENTS(__curDirs ${in_Path})
+
+	list(TRANSFORM __curDirs PREPEND "${in_Path}/")
+	list(APPEND ${out_Contents} ${__curDirs})
+	foreach(lfe IN LISTS __curDirs)
+		if(IS_DIRECTORY ${lfe})
+			GET_DIRECTORY_CONTENTS_RECURSIVE(${out_Contents} ${lfe})
+		endif()
+	endforeach()
+endmacro()
 
 
 

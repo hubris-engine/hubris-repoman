@@ -1,8 +1,6 @@
 @ECHO OFF
 SETLOCAL
 
-set DEFAULT_PYTHON_TOOL="python"
-
 :: Path to this script's directory
 set SCRIPT_DIR=%~dp0
 
@@ -13,15 +11,11 @@ set REPO_ROOT=%SCRIPT_DIR%/../..
 set TOOLS_ROOT=%REPO_ROOT%/tools
 
 :: Path to the script this redirect into
-set PYTHON_SCRIPT_PATH=%SCRIPT_DIR%/scripts/python.py
+set PYTHON_SCRIPT_PATH=%SCRIPT_DIR%/scripts/openurl.py
 
-:: Use a reasonable default if no PYTHON env variable is defined
-IF "%PYTHON%"=="" ( 
-    set PYTHON_TOOL=%DEFAULT_PYTHON_TOOL%
-) ELSE (
-	set PYTHON_TOOL=%PYTHON%
-)
+:: Path to the python tool
+set USE_PYTHON=%TOOLS_ROOT%/deps/python.bat
 
 :: Invoke the python script
-call %PYTHON_TOOL% %PYTHON_SCRIPT_PATH% %*
+call %USE_PYTHON% %PYTHON_SCRIPT_PATH% %*
 exit /B %errorlevel%
