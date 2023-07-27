@@ -388,3 +388,33 @@ endmacro()
 macro(INCREMENT out_var in_var)
 	math(EXPR ${out_var} "${in_var}+1")
 endmacro()
+
+
+
+
+#
+# Propogate scripts directory to build
+#
+macro(COPY_DIRECTORY_TO_BUILD out_dirTarget in_dirName)
+
+	set(__foo )
+	GET_DIRECTORY_CONTENTS_RECURSIVE(__foo "${CMAKE_CURRENT_LIST_DIR}/${in_dirName}")
+	
+	add_custom_command(
+		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${in_dirName}
+		COMMAND cmake -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/${in_dirName}
+		COMMAND cmake -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/${in_dirName} ${CMAKE_CURRENT_BINARY_DIR}/${in_dirName}
+		DEPENDS ${CMAKE_CURRENT_LIST_DIR}/${in_dirName} ${__foo}
+		VERBATIM
+		COMMENT "Copying directory to build : \"${in_dirName}\""
+		WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+	)
+	add_custom_target(
+		buildir_${in_dirName}
+		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${in_dirName}
+	)
+	set(${out_dirTarget} buildir_${in_dirName})
+endmacro()
+
+
+
