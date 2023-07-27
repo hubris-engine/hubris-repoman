@@ -24,9 +24,10 @@ endif()
 macro(DEPGET_CLONE_GIT_REPOSITORY_EXECUTE in_Repo in_CloneDest)
 	
 	set(__command ${GIT_EXECUTABLE} clone ${in_Repo} ${in_CloneDest})
+
+	# If the extra branch argument was given, we need to modify the git command to include it
 	if (${ARGC} EQUAL 3)
 		set(__command ${__command} -b ${ARGV2})
-		message(FATAL_ERROR "${__command}")
 	endif()
 
 	execute_process (
