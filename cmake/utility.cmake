@@ -417,4 +417,28 @@ macro(COPY_DIRECTORY_TO_BUILD out_dirTarget in_dirName)
 endmacro()
 
 
+#
+# Propogate scripts directory to a specified path
+#
+macro(COPY_DIRECTORY_TO_PATH out_dirTarget in_dirName in_copyDestination)
+
+	set(__foo )
+	GET_DIRECTORY_CONTENTS_RECURSIVE(__foo "${CMAKE_CURRENT_LIST_DIR}/${in_dirName}")
+	
+	add_custom_command(
+		OUTPUT ${in_copyDestination}/${in_dirName}
+		COMMAND cmake -E remove_directory ${in_copyDestination}/${in_dirName}
+		COMMAND cmake -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/${in_dirName} ${in_copyDestination}/${in_dirName}
+		DEPENDS ${CMAKE_CURRENT_LIST_DIR}/${in_dirName} ${__foo}
+		VERBATIM
+		COMMENT "Copying directory to build : \"${in_dirName}\""
+		WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+	)
+	add_custom_target(
+		buildir_${in_dirName}
+		DEPENDS ${in_copyDestination}/${in_dirName}
+	)
+	set(${out_dirTarget} buildir_${in_dirName})
+endmacro()
+
 
