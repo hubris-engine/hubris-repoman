@@ -1,7 +1,7 @@
 @ECHO OFF
 SETLOCAL
 
-set DEFAULT_PYTHON_TOOL="python"
+set DEFAULT_PYTHON_TOOL="python3"
 
 :: Path to this script's directory
 set SCRIPT_DIR=%~dp0

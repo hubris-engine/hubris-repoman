@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-DEFAULT_PYTHON_TOOL="python"
+DEFAULT_PYTHON_TOOL="python3"
 
 # Path to this script's parent directory
 SCRIPT_DIR=$(dirname ${BASH_SOURCE})
