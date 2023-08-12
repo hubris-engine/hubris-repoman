@@ -442,3 +442,20 @@ macro(COPY_DIRECTORY_TO_PATH out_dirTarget in_dirName in_copyDestination)
 endmacro()
 
 
+#
+# Creates a symlink to a specified path
+#
+macro(MAKELINK_TO_PATH out_dirTarget in_dirAbsolutePath in_copyDestination)
+	set(_symlinkResult )
+	set(_symlinkError )
+	execute_process(
+		COMMAND ${CMAKE_COMMAND} -E create_symlink
+			"${in_dirAbsolutePath}" "${in_copyDestination}"
+		WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+		RESULT_VARIABLE _symlinkResult  
+		ERROR_VARIABLE _symlinkError
+	)
+	if(_symlinkResult)
+		message(FATAL_ERROR "${_symlinkError}")
+	endif()
+endmacro()
