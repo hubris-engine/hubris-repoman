@@ -25,6 +25,7 @@ def open_html_file(path : Path):
 	return webbrowser.open(url,new=new)
 
 parser = argparse.ArgumentParser(description="Runs doxygen")
+parser.add_argument("doxygen_config_path", help="Path to the doxygen config file", default=_DOXYGEN_DEFAULT_CONFIG_PATH, type=Path)
 parser.add_argument("--no_clean", help="Prevents cleaning the generated doxygen output", action="store_true", default=False)
 parser.add_argument("--open", help="Causes the generated doxygen to be opened in the browers (only tested on windows)",
 	action="store_true")
@@ -48,7 +49,7 @@ if not out_root.exists():
 
 doxygen = doxy.Doxygen()
 
-doxygen_config_path = _DOXYGEN_DEFAULT_CONFIG_PATH
+doxygen_config_path = Path(args.doxygen_config_path)
 if not doxygen_config_path.exists():
 	hubris.log_error(f"Doxygen config doesn't exist! Path = {str(_DOXYGEN_DEFAULT_CONFIG_PATH)}")
 	exit(1)
