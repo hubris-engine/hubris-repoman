@@ -11,7 +11,7 @@ _ADD_PYTHON_PATHS = [
 ]
 
 # Python executable to use
-_PYTHON_TOOL="python"
+_PYTHON_TOOL= Path(sys.executable).resolve()
 
 # Resolve the path to this script
 exec_script_path = Path(sys.argv[0])

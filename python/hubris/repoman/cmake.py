@@ -7,8 +7,7 @@ import hubris
 
 _CLANG_WARNING_REGEX = re.compile("warning:")
 _CMAKE_FAILED_REGEX = re.compile("FAILED:")
-		
-
+	
 
 class CMakeLogLevel:
 	warning="WARNING"
@@ -33,6 +32,12 @@ _COMPILER_NAMES = [
 	_CompilerInfo("gcc", "g++")
 ]	
 
+
+_CMAKE_DEFAULT_GENERATOR = "Ninja"
+_CMAKE_DEFAULT_COMPILER = Compiler.clang
+
+
+
 class CMakeDef:
 
 	def make_def(self) -> str:
@@ -54,7 +59,7 @@ class CMakeDef:
 
 def _make_cmake_generate_command(
 	definitions : "list[CMakeDef]" = [],
-	generator 	: str = "Ninja",
+	generator 	: str | None = None,
 	source_root : str = ".",
 	build_root 	: str = "_build",
 	log_level 	: CMakeLogLevel = "VERBOSE",
@@ -65,7 +70,7 @@ def _make_cmake_generate_command(
 		command.append("-Wno-dev")
 
 	command.extend([
-		"-G", generator,
+		"-G", generator or _CMAKE_DEFAULT_GENERATOR,
 		"--log-level=" + str(log_level)
 	])
 
@@ -79,6 +84,13 @@ def _make_cmake_generate_command(
 	
 	return command
 
+def does_generator_support_platform_option(generator : str):
+	if generator == "Ninja":
+		return False
+	else:
+		return True
+
+
 
 class CMake:
 
@@ -86,8 +98,10 @@ class CMake:
 		defs : "list[CMakeDef]" = None,
 		build_root : "pathlib.Path" = "_build",
 		source_root : "pathlib.Path" = ".",
-		compiler : Compiler = Compiler.clang,
-		env = None):	
+		compiler : Compiler = None,
+		env = None,
+		generator : str | None = None,
+		target_platform : str | None = None):	
 		"""
 		defs : Additional definitions to give to cmake.
 		build_root : Path to the build directory root relative to the repository root dir. 
@@ -98,6 +112,13 @@ class CMake:
 
 		build_root = pathlib.Path(build_root)
 		source_root = pathlib.Path(source_root)
+		generator = generator or _CMAKE_DEFAULT_GENERATOR
+		
+		# No compiler should be specified for Visual Studio
+		if not generator.startswith("Visual Studio"):
+			compiler = compiler or _CMAKE_DEFAULT_COMPILER
+		else:
+			compiler = None
 
 		# Create our custom environment
 		_env = env or os.environ
@@ -120,12 +141,20 @@ class CMake:
 			hubris.log_debug(f'CC = {_env["CC"]}')
 			hubris.log_debug(f'CXX = {_env["CXX"]}')
 
+		# If the platform parameter was set, add it
+		if target_platform is not None:
+			if does_generator_support_platform_option(generator):
+				cmake_generate_extra_args.extend(['-A', target_platform])
+			else:
+				cmake_generate_extra_args.extend([f'-DCMAKE_CXX_FLAGS="--target={target_platform}-unknown-unknown"'])
+
 		defs.extend(cmake_generate_extra_args)
 		cmake_generate_command = _make_cmake_generate_command(
 			defs,
 			log_level=CMakeLogLevel.verbose,
 			build_root=str(build_root),
-			source_root=str(source_root)
+			source_root=str(source_root),
+			generator=generator
 		)
 		hubris.log_debug(f"{cmake_generate_command}")
 
@@ -145,10 +174,21 @@ class CMake:
 		clean_first : bool = False,
 		build_root : pathlib.Path = "_build",
 		jobs : "int | None" = None,
-		hide_warnings : bool = True):
+		hide_warnings : bool = True,
+		compiler : Compiler = None,
+		target_platform : str | None = None,
+		generator : str | None = None):
 
 		build_root = pathlib.Path(build_root)
-		
+
+		generator = generator or _CMAKE_DEFAULT_GENERATOR
+
+		# No compiler should be specified for Visual Studio
+		if not generator.startswith("Visual Studio"):
+			compiler = compiler or _CMAKE_DEFAULT_COMPILER
+		else:
+			compiler = None
+
 		# Ensure the build root exists
 		if not build_root.exists():
 			os.makedirs(build_root)
@@ -157,7 +197,7 @@ class CMake:
 		cmake_build_command = [
 			"cmake",
 			"--build",
-			f'{str(build_root.resolve())}',
+			f'"{str(build_root.resolve())}"',
 		]
 	
 		# Set the config if one was specified.
@@ -178,9 +218,12 @@ class CMake:
 				str(jobs)
 			])
 
+
+
 		# Run cmake build and redirect output to a file
 		log_file = open(log_file_path, "w")
-		result = subprocess.run(cmake_build_command, stdout=log_file)
+		print(" ".join(cmake_build_command))
+		result = subprocess.run(" ".join(cmake_build_command), stdout=log_file)
 		log_file.close()
 
 		# Read in the logged information
@@ -282,6 +325,8 @@ class CMake:
 		source_root : "pathlib.Path" = ".",
 		compiler : Compiler = Compiler.clang,
 		env = None,
+		generator : str | None = None,
+		target_platform : str | None = None,
 		config : "str | None" = None,
 		clean_first : bool = False,
 		jobs : "int | None" = None,
@@ -292,7 +337,9 @@ class CMake:
 			build_root=build_root,
 			source_root=source_root,
 			compiler=compiler,
-			env=env
+			env=env,
+			target_platform=target_platform,
+			generator=generator
 		):
 			return False
 		
@@ -301,7 +348,10 @@ class CMake:
 			clean_first=clean_first,
 			build_root=build_root,
 			jobs=jobs,
-			hide_warnings=hide_warnings
+			hide_warnings=hide_warnings,
+			compiler=compiler,
+			target_platform=target_platform,
+			generator=generator
 		):
 			return False
 
