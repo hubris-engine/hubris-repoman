@@ -443,19 +443,57 @@ endmacro()
 
 
 #
-# Creates a symlink to a specified path
+# Creates a symlink to a specified path, out_Result is set to 1 on
+# success, and 0 on error.
+# 
+# If an error occured out_Error will be set to the error.
 #
-macro(MAKELINK_TO_PATH out_dirTarget in_dirAbsolutePath in_copyDestination)
+macro(TRY_MAKELINK_TO_PATH out_Result out_Error in_dirAbsolutePath in_linkDestination)
 	set(_symlinkResult )
 	set(_symlinkError )
 	execute_process(
 		COMMAND ${CMAKE_COMMAND} -E create_symlink
-			"${in_dirAbsolutePath}" "${in_copyDestination}"
+			"${in_dirAbsolutePath}" "${in_linkDestination}"
 		WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
 		RESULT_VARIABLE _symlinkResult  
 		ERROR_VARIABLE _symlinkError
 	)
 	if(_symlinkResult)
-		message(FATAL_ERROR "${_symlinkError}")
+		set(${out_Error} "${_symlinkError}")
+		set(${out_Result} 0)
+	else()
+		set(${out_Result} 1)
+	endif()
+endmacro()
+
+#
+# Creates a symlink to a specified path
+#
+macro(MAKELINK_TO_PATH in_dirAbsolutePath in_linkDestination)
+	set(_trySymlinkResult )
+	set(_trySymlinkError )
+	TRY_MAKELINK_TO_PATH(_trySymlinkResult _trySymlinkError "${in_dirAbsolutePath}" "${in_linkDestination}")
+	if (NOT _trySymlinkResult)
+		message(FATAL_ERROR "${_trySymlinkError}")
+	endif()
+endmacro()
+
+#
+# Creates a symlink if possible to a specified path, making a copy of the directory
+# as a backup.
+#
+# If a link is created, out_dirTarget will not be set.
+# Otherwise, out_dirTarget will be a target that should be added as a depedency to something
+# so that the copied file is kept up to date.
+#
+macro(MAKELINK_OR_COPY_TO_PATH out_dirTarget in_dirAbsolutePath in_Destination)
+	set(_makelinkOrCopy_SymlinkResult )
+	set(_makelinkOrCopy_SymlinkError )
+	TRY_MAKELINK_TO_PATH(_makelinkOrCopy_SymlinkResult _makelinkOrCopy_SymlinkError "${in_dirAbsolutePath}" "${in_Destination}")
+
+	# Check if makelink failed
+	if(NOT _makelinkOrCopy_SymlinkResult)
+		# Copy file to destination
+		COPY_DIRECTORY_TO_PATH(${out_dirTarget} "${in_dirAbsolutePath}" "${in_Destination}")
 	endif()
 endmacro()
